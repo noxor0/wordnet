@@ -18,22 +18,31 @@ public final class Vertex {
 	/**
 	 * A list of egdes this vertex points to.
 	 */
-	public LinkedList<Vertex> myEdges;
+	public LinkedList<Vertex> myEdges;	
 	/**
 	 * If the vertex is visited in traversal.
 	 */
 	public boolean myVisited = false;
 	/**
+	 * Distance from the start of the traversal
+	 */
+	public int myDistance = 0;
+	/**
 	 * Word associated with the ID
 	 */
 	private String myWord;
+	/**
+	 * The definition
+	 * (unused)
+	 */
+	private String myDef;
 	/**
 	 * Constructor for Vertex
 	 * 
 	 * @param theID the ID
 	 * @param theWord the Word
 	 */
-	public Vertex(final int theID, final String theWord) {
+	public Vertex(final int theID, final String theWord, final String theDef) {
 		if (theID < 0 || theWord == null) {
 			System.err.println("One of the vertex params are null!");
 			throw new IllegalArgumentException();
@@ -41,6 +50,7 @@ public final class Vertex {
 		myID = theID;
 		myEdges = new LinkedList<Vertex>();
 		myWord = theWord;
+		myDef = theDef;
 	}
 	
 	/**
@@ -50,5 +60,8 @@ public final class Vertex {
 	 */
 	public String getWord() {
 		return myWord;
+	}
+	public String getDef() {
+		return myDef;
 	}
 }

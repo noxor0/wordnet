@@ -1,7 +1,8 @@
 package wordnet;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Stack;
+import java.util.Queue;
 
 /**
  * SHORTEST ANCESTOR PATH
@@ -13,12 +14,7 @@ public final class SAP {
 	/**
 	 * the graph used to traverse.
 	 */
-	private Diagraph myGraph;
-	/**
-	 * The path that was traversed last.
-	 * this is a bit messy.
-	 */
-	private LinkedList<Integer> myPath;
+	public Diagraph myGraph;
 	/**
 	 * @param theArgs command line arguments  
 	 * @throws Exception if the nouns are not valid
@@ -36,11 +32,9 @@ public final class SAP {
 		} if (v == w) {
 			System.out.println("Sap: 0 Ancestor: 0");
 		} else {
-			System.out.println("SAP: " + sap.length(v, w) +
-					" Ancestor: " + sap.ancestorldx(v, w));			
+			System.out.println("SAP: " + sap.length(v, w) 
+			+ " Ancestor: " + sap.ancestorldx(v, w));			
 		}
-		
-		
 	}
 	/**
 	 * constructor for SAP
@@ -53,52 +47,21 @@ public final class SAP {
 			System.err.println("Graph is null");
 			throw new IllegalArgumentException();
 		} else {
-			myPath = new LinkedList<Integer>();
 			myGraph = G;			
 		}
 	}
 	/**
-	 * Finds the path to the root.
-	 * 
-	 * @param theV the vertex to start at
-	 * @return a stack of IDs to the root, in order
-	 */
-	public Stack<Integer> findPath(final Vertex theV) {
-		Stack<Integer> path = new Stack<Integer>();
-		findAncestors(path, theV);
-		resetVisited(theV);
-		return path;
-	}
-	/**
 	 * Resets the visited flag in the Vertex.
 	 * 
-	 * @param theV
+	 * @param theV the vertex to start at
 	 */
 	private void resetVisited(final Vertex theV) {
 		for(Vertex v: theV.myEdges) {
-			if (v != null && v.myVisited) {
+			if (v != null) {
 				resetVisited(v);
 				v.myVisited = false;
 			}
 		}
-	}
-	/**
-	 * Finds the common ancestor of the two vertices.
-	 * Recursive function that does DFS.
-	 * 
-	 * @param path the current path of the DFS traversal
-	 * @param theV the current vertex of the DFS traversal
-	 */
-	public void findAncestors(Stack<Integer> path, final Vertex theV) {		
-		//recursive
-		path.push(theV.myID);
-		for(Vertex v: theV.myEdges) {
-			if (v != null && !v.myVisited) {
-				findAncestors(path, v);
-				v.myVisited = true;
-			}
-		}
-		
 	}
 	/**
 	 * length between v and w.
@@ -109,13 +72,38 @@ public final class SAP {
 	 * @return the length from v to the common ancestor then back to w
 	 */
 	public int length(final int v,final int w) {
-		myPath.clear();
-		ancestorldx(v, w);
 		int retVal = -1;
-		if (myPath.size() > -1) {
-			retVal = myPath.size();
+		int lcaID = ancestorldx(v, w);
+		if (myGraph.myVerticies.get(lcaID) != null) {
+			retVal = myGraph.myVerticies.get(lcaID).myDistance;
 		}
 		return retVal;
+	}
+	/**
+	 * Does a BFS search through the map 
+	 * 
+	 * @param theV the start vertex
+	 * @return all the visited nodes
+	 */
+	public ArrayList<Integer> BFS(final Vertex theV) {
+		resetVisited(theV);
+		ArrayList<Integer> pathRet = new ArrayList<Integer>();
+		Queue<Vertex> q = new LinkedList<Vertex>();
+		q.add(theV);
+		pathRet.add(theV.myID);
+		theV.myVisited = true;
+		while(!q.isEmpty()) {
+			Vertex ver = q.remove();
+			for(Vertex x : ver.myEdges) {
+				if (!x.myVisited) {
+					x.myDistance = x.myDistance + ver.myDistance + 1;
+					x.myVisited = true;
+					q.add(x);
+					pathRet.add(x.myID);					
+				}
+			}
+		}
+		return pathRet;
 	}
 	/**
 	 * a common ancestor of v and w that participates
@@ -126,27 +114,16 @@ public final class SAP {
 	 * @return the ID of the common ancestor
 	 */
 	public int ancestorldx(final int v, final int w) {
-		myPath.clear();
-		int retVal = -1;
-		Stack<Integer> path1 = findPath(myGraph.myVerticies.get(v));
-		Stack<Integer> path2 = findPath(myGraph.myVerticies.get(w));
-		for (Integer vertID: path1) {
-			if(path2.contains(vertID)) {
-				retVal = vertID;
+		int lcaID = -1;
+		ArrayList<Integer> pathV = BFS(myGraph.myVerticies.get(v));
+		ArrayList<Integer> pathW = BFS(myGraph.myVerticies.get(w));
+		for (Integer vertID: pathV) {
+			if(pathW.contains(vertID)) {
+				lcaID = vertID;
 				break;
-			} else {
-				myPath.push(vertID);
 			}
 		}
-		boolean addRest = false;
-		while (!path2.isEmpty()) {
-			if (path2.peek() == retVal || addRest) {
-				addRest = true;
-				myPath.push(path2.peek());
-			}
-			path2.pop();
-		}
-		return retVal;
+		return lcaID;
 	}
 	/**
 	 * takes in the ancestor index returned by the
@@ -157,5 +134,39 @@ public final class SAP {
 	public String ancestor(final int ancldx) {
 		return myGraph.myVerticies.get(ancldx).getWord();
 	}
-	
 }
+
+///**
+// * Finds the path to the the second value.
+// * 
+// * @param theV the vertex to start at
+// * @return a stack of IDs to the root, in order
+// */
+//public Stack<Integer> findPath(final Vertex theV, final Vertex theX) {
+//	Stack<Integer> path = new Stack<Integer>();
+//	findAncestors(path, theV, theX);
+//	resetVisited(theV);
+//	return path;
+//}
+///**
+// * Finds the common ancestor of the two vertices.
+// * Recursive function that does DFS.
+// * 
+// * @param path the current path of the DFS traversal
+// * @param theV the current vertex of the DFS traversal
+// */
+//public void findAncestors(Stack<Integer> path, 
+//		final Vertex theV, final Vertex theX) {		
+//	//recursive
+//	path.push(theV.myID);
+//	for(Vertex v: theV.myEdges) {
+//		if (v != null && !v.myVisited) {
+//			if (v.myID == theX.myID) {
+//				System.out.println("found it?");
+//			}
+//			findAncestors(path, v, theX);
+//			v.myVisited = true;
+//		}
+//	}
+//	
+//}

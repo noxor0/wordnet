@@ -45,9 +45,9 @@ public final class WordNet {
 		}
 		//successful!
 		if (net.isNoun(nounA) && net.isNoun(nounB)) {
-			System.out.println(
-					"Ancestor: " + net.mySap.ancestor(net.mySap.ancestorldx(v, w)));
-			System.out.println("Length: " + net.distance(nounA, nounB));			
+			System.out.print("Length: " + net.distance(nounA, nounB));
+			System.out.println(" Ancestor: " + 
+			net.mySap.ancestor(net.mySap.ancestorldx(v, w)));
 		}
 	}
 	  

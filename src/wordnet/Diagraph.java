@@ -66,7 +66,7 @@ public final class Diagraph {
 				mySynsetEntries++;
 				String[] lineArr = input.split(",");
 				Vertex newVertex = new Vertex(
-						Integer.parseInt(lineArr[0]), lineArr[1]);
+						Integer.parseInt(lineArr[0]), lineArr[1], getDef(lineArr));
 				addVertex(newVertex);
 			}
 			synIn.close();
@@ -76,7 +76,17 @@ public final class Diagraph {
 			System.err.println("IO Exception");
 		}
 	}
-	
+	private String getDef(final String[] theArr) {
+		StringBuilder sb = new StringBuilder();
+		if(theArr[2] != null) {
+			for (int i = 2; i < theArr.length; i++) {
+				sb.append(theArr[i]);
+			}			
+		} else {
+			sb.append("No def");
+		}
+		return sb.toString();
+	}
 	/**
 	 * Reads the hypernyms file and 
 	 * adds the edges to the corresponding vertices
